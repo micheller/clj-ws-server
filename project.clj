@@ -6,7 +6,8 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [http-kit "2.1.18"]
                  [ring/ring-devel "1.1.8"]
-                 [ring/ring-core "1.1.8"]]
+                 [ring/ring-core "1.1.8"]
+                 [org.clojure/data.json "0.2.6"]]
   :main ^:skip-aot ws-test.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
