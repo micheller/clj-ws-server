@@ -53,7 +53,8 @@
 ;;    :body    "hello, darling!"})
 
 (defn answer []
-  (pr-str {:sorry "We're out of the dicks you ordered"
+  (pr-str {:restaurant "Le Telepathe"
+           :sorry "We're out of the dishes you ordered"
            :dish-of-the-day "chocolate caviar fountain with bacon crackers"}))
 
 (defn handler [request]
@@ -72,8 +73,10 @@
                             (println data)
                             (print "<--- ")
                             (println ans)
-                            (println (d/q '[:find ?e
-                                            :where [?e :user/name]]
+                            (println (d/q '[:find ?e ?name ?lastname
+                                            :where
+                                            [?e :user/name ?name]
+                                            [?e :user/lastname ?lastname]]
                                           (d/db conn)) "\n"))))))
 
 (defn -main [& args]
