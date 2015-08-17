@@ -54,7 +54,7 @@
 
 (defn answer []
   (pr-str {:restaurant "Le Telepathe"
-           :sorry "We're out of the dishes you ordered"
+           :sorry "We're out of the di..shes you ordered"
            :dish-of-the-day "chocolate caviar fountain with bacon crackers"}))
 
 (defn handler [request]
