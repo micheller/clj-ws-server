@@ -1,7 +1,6 @@
 (ns ws-test.core
   (:gen-class)
   (:require [datomic.api :as d]
-            ;; [datomic.samples.repl :as repl]
             [org.httpkit.server :as serv]
             [ring.middleware.reload :refer [wrap-reload]]
             [clojure.pprint :refer [pprint]]
@@ -32,11 +31,11 @@
     :db/valueType :db.type/string
     :db/cardinality :db.cardinality/one
     :db.install/_attribute :db.part/db}
-   ;; {:db/id #db/id[:db.part/db]
-   ;;  :db/ident :order/id
-   ;;  :db/valueType :db.type/long
-   ;;  :db/cardinality :db.cardinality/one
-   ;;  :db.install/_attribute :db.part/db}
+   {:db/id #db/id[:db.part/db]
+    :db/ident :order/id
+    :db/valueType :db.type/long
+    :db/cardinality :db.cardinality/one
+    :db.install/_attribute :db.part/db}
    ])
 
 
@@ -45,7 +44,7 @@
   [order]
   @(d/transact
     conn
-    [order]))
+    [(assoc (read-string order) :db/id (d/tempid :db.part/user))]))
 
 ;; (defn app [req]
 ;;   {:status  200
@@ -62,22 +61,24 @@
     ;; (send! channel "EHLO")
     (println "REQ:" request)
     (println "CHAN:" channel)
+    (serv/send!
+     channel
+     (pr-str
+      (d/q '[:find ?e ?name ?lastname ?order
+             :where
+             [?e :user/name ?name]
+             [?e :user/lastname ?lastname]
+             [?e :order/id ?order]]
+           (d/db conn))))
     (serv/on-close channel (fn [status] (println "channel closed: " status "\n")))
     (serv/on-receive channel (fn [data]
                           (let [ans (answer)]
-                            (add-order {:db/id (d/tempid :db.part/user)
-                                        :user/name "Mike"
-                                        :user/lastname "Koltsov"})
-                            (serv/send! channel ans)
+                            (add-order data)
+                            (serv/send! ans)
                             (print "---> ")
                             (println data)
                             (print "<--- ")
-                            (println ans)
-                            (println (d/q '[:find ?e ?name ?lastname
-                                            :where
-                                            [?e :user/name ?name]
-                                            [?e :user/lastname ?lastname]]
-                                          (d/db conn)) "\n"))))))
+                            (println ans "\n"))))))
 
 (defn -main [& args]
   (serv/run-server (wrap-reload #'handler) {:port 8088}))
