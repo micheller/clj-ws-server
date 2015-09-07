@@ -61,24 +61,23 @@
     ;; (send! channel "EHLO")
     (println "REQ:" request)
     (println "CHAN:" channel)
-    (serv/send!
-     channel
-     (pr-str
-      (d/q '[:find ?e ?name ?lastname ?order
-             :where
-             [?e :user/name ?name]
-             [?e :user/lastname ?lastname]
-             [?e :order/id ?order]]
-           (d/db conn))))
     (serv/on-close channel (fn [status] (println "channel closed: " status "\n")))
     (serv/on-receive channel (fn [data]
-                          (let [ans (answer)]
+                          (let [ans (answer)
+                                db-data (d/q '[:find [(pull ?e [*]) ...]
+                                               :where [?e :order/id _]]
+                                             (d/db conn))
+                                ]
                             (add-order data)
-                            (serv/send! ans)
                             (print "---> ")
                             (println data)
                             (print "<--- ")
-                            (println ans "\n"))))))
+                            (println ans "\n")
+                            (println (type db-data))
+                            (println (first db-data))
+                            (serv/send!
+                             channel
+                             (str db-data)))))))
 
 (defn -main [& args]
-  (serv/run-server (wrap-reload #'handler) {:port 8088}))
+  (serv/run-server (wrap-reload #'handler) {:port 1488}))
