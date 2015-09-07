@@ -46,11 +46,6 @@
     conn
     [(assoc (read-string order) :db/id (d/tempid :db.part/user))]))
 
-;; (defn app [req]
-;;   {:status  200
-;;    :headers {"Content-Type" "text/html"}
-;;    :body    "hello, darling!"})
-
 (defn answer []
   (pr-str {:restaurant "Le Telepathe"
            :sorry "We're out of the di..shes you ordered"
@@ -58,7 +53,6 @@
 
 (defn handler [request]
   (serv/with-channel request channel
-    ;; (send! channel "EHLO")
     (println "REQ:" request)
     (println "CHAN:" channel)
     (serv/on-close channel (fn [status] (println "channel closed: " status "\n")))
