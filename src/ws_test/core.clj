@@ -4,7 +4,7 @@
             [org.httpkit.server :as serv]
             [ring.middleware.reload :refer [wrap-reload]]
             [clojure.pprint :refer [pprint]]
-            ;; [clojure.data.json :refer [json-str read-json]]
+            [validateur.validation :as val]
             ))
 
 (def db-uri-base "datomic:mem://")
@@ -46,11 +46,6 @@
     conn
     [(assoc (read-string order) :db/id (d/tempid :db.part/user))]))
 
-(defn answer []
-  (pr-str {:restaurant "Le Telepathe"
-           :sorry "We're out of the di..shes you ordered"
-           :dish-of-the-day "chocolate caviar fountain with bacon crackers"}))
-
 (defn handler [request]
   (serv/with-channel request channel
     (println "REQ:" request)
@@ -60,8 +55,7 @@
                           (let [ans (answer)
                                 all-db-data (d/q '[:find [(pull ?e [*]) ...]
                                                :where [?e :order/id _]]
-                                             (d/db conn))
-                                ]
+                                             (d/db conn))]
                             (add-order data)
                             (print "---> ")
                             (println data)
