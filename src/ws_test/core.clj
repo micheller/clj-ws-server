@@ -52,8 +52,7 @@
     (println "CHAN:" channel)
     (serv/on-close channel (fn [status] (println "channel closed: " status "\n")))
     (serv/on-receive channel (fn [data]
-                          (let [ans (answer)
-                                all-db-data (d/q '[:find [(pull ?e [*]) ...]
+                          (let [all-db-data (d/q '[:find [(pull ?e [*]) ...]
                                                :where [?e :order/id _]]
                                              (d/db conn))]
                             (add-order data)
