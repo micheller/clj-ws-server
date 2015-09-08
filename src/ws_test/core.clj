@@ -52,18 +52,18 @@
     (println "CHAN:" channel)
     (serv/on-close channel (fn [status] (println "channel closed: " status "\n")))
     (serv/on-receive channel (fn [data]
-                          (let [all-db-data (d/q '[:find [(pull ?e [*]) ...]
-                                               :where [?e :order/id _]]
-                                             (d/db conn))]
-                            (add-order data)
-                            (print "---> ")
-                            (println data)
-                            (print "<--- ")
-                            (println all-db-data)
-                            (println "type of db data:" (type all-db-data) "\n")
-                            (serv/send!
-                             channel
-                             (str all-db-data)))))))
+                               (let [all-db-data (d/q '[:find [(pull ?e [*]) ...]
+                                                        :where [?e :order/id _]]
+                                                      (d/db conn))]
+                                 (add-order data)
+                                 (print "---> ")
+                                 (println data)
+                                 (print "<--- ")
+                                 (println all-db-data)
+                                 (println "type of db data:" (type all-db-data) "\n")
+                                 (serv/send!
+                                  channel
+                                  (str all-db-data)))))))
 
 (defn -main [& args]
   (serv/run-server (wrap-reload #'handler) {:port 1488}))
