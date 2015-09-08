@@ -1,11 +1,14 @@
 (ns ws-test.core
-  (:gen-class)
-  (:require [datomic.api :as d]
-            [org.httpkit.server :as serv]
-            [ring.middleware.reload :refer [wrap-reload]]
-            [clojure.pprint :refer [pprint]]
-            [validateur.validation :as val]
-            ))
+  (:require
+   [clojure.tools.logging :as blog]
+   [datomic.api :as d]
+   [org.httpkit.server :as serv]
+   [ring.middleware.reload :refer [wrap-reload]]
+   [clj-logging-config.jul :as log-config]
+   ;; [validateur.validation :as val]
+   ))
+
+(log-config/set-logger! :level :debug)
 
 (def db-uri-base "datomic:mem://")
 
@@ -48,22 +51,20 @@
 
 (defn handler [request]
   (serv/with-channel request channel
-    (println "REQ:" request)
-    (println "CHAN:" channel)
+    (blog/info "request:" request)
+    (blog/info "channel:" channel)
     (serv/on-close channel (fn [status] (println "channel closed: " status "\n")))
     (serv/on-receive channel (fn [data]
                                (let [all-db-data (d/q '[:find [(pull ?e [*]) ...]
                                                         :where [?e :order/id _]]
                                                       (d/db conn))]
                                  (add-order data)
-                                 (print "---> ")
-                                 (println data)
-                                 (print "<--- ")
-                                 (println all-db-data)
-                                 (println "type of db data:" (type all-db-data) "\n")
                                  (serv/send!
                                   channel
-                                  (str all-db-data)))))))
+                                  (str all-db-data))
+                                 (blog/info  "--->" data)
+                                 (blog/info  "<---" all-db-data)
+                                 (blog/debug "type of db data:" (type all-db-data) "\n"))))))
 
 (defn -main [& args]
   (serv/run-server (wrap-reload #'handler) {:port 1488}))
