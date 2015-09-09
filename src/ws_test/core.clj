@@ -1,14 +1,13 @@
 (ns ws-test.core
   (:require
-   [clojure.tools.logging :as blog]
    [datomic.api :as d]
    [org.httpkit.server :as serv]
    [ring.middleware.reload :refer [wrap-reload]]
-   [clj-logging-config.jul :as log-config]
+   [taoensso.timbre :as blog]
    ;; [validateur.validation :as val]
    ))
 
-(log-config/set-logger! :level :debug)
+(blog/set-level! :debug)
 
 (def db-uri-base "datomic:mem://")
 
@@ -51,7 +50,7 @@
 
 (defn handler [request]
   (serv/with-channel request channel
-    (blog/info "request:" request)
+    ;; (blog/info "request:" request)
     (blog/info "channel:" channel)
     (serv/on-close channel (fn [status] (println "channel closed: " status "\n")))
     (serv/on-receive channel (fn [data]
